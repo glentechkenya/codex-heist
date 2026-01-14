@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Codex Heist</title>
+  <style>
+    body { font-family: Arial; background:#0b0b0b; color:#00ffcc; }
+    #messages { height:300px; overflow-y:auto; border:1px solid #00ffcc; padding:10px; }
+    input { width:80%; padding:10px; background:#000; color:#00ffcc; border:1px solid #00ffcc; }
+    button { padding:10px; background:#00ffcc; color:#000; border:none; }
+  </style>
+</head>
+<body>
+  <h2>🕶️ Codex Heist</h2>
+  <div id="messages"></div>
+  <input id="msg" placeholder="Type your message..." />
+  <button onclick="send()">Send</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const messages = document.getElementById("messages");
+
+    socket.on("message", (msg) => {
+      const div = document.createElement("div");
+      div.textContent = msg;
+      messages.appendChild(div);
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    function send(){
+      const input = document.getElementById("msg");
+      socket.emit("message", input.value);
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
