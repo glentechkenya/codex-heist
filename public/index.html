@@ -1,37 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Codex Heist</title>
-  <style>
-    body { font-family: Arial; background:#0b0b0b; color:#00ffcc; }
-    #messages { height:300px; overflow-y:auto; border:1px solid #00ffcc; padding:10px; }
-    input { width:80%; padding:10px; background:#000; color:#00ffcc; border:1px solid #00ffcc; }
-    button { padding:10px; background:#00ffcc; color:#000; border:none; }
-  </style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codex Heist</title>
+
+<style>
+* { box-sizing: border-box; font-family: Arial; }
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: #00ffcc;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  padding: 15px;
+  text-align: center;
+  background: #000;
+  border-bottom: 1px solid #00ffcc;
+}
+
+#messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.message {
+  background: #111;
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.me {
+  background: #00ffcc;
+  color: black;
+  margin-left: auto;
+}
+
+.system {
+  background: transparent;
+  text-align: center;
+  font-size: 12px;
+  color: gray;
+}
+
+.input-bar {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #00ffcc;
+  background: #000;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  background: #111;
+  border: none;
+  border-radius: 20px;
+  color: #00ffcc;
+}
+
+button {
+  padding: 12px 18px;
+  margin-left: 8px;
+  background: #00ffcc;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+}
+</style>
 </head>
+
 <body>
-  <h2>🕶️ Codex Heist</h2>
-  <div id="messages"></div>
-  <input id="msg" placeholder="Type your message..." />
+
+<header>🕶️ Codex Heist</header>
+<div id="messages"></div>
+
+<div class="input-bar">
+  <input id="msg" placeholder="Type message…" />
   <button onclick="send()">Send</button>
+</div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-    const messages = document.getElementById("messages");
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const messages = document.getElementById("messages");
 
-    socket.on("message", (msg) => {
-      const div = document.createElement("div");
-      div.textContent = msg;
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    });
+let username = prompt("Enter your codename:");
+if(!username) username = "Anonymous";
+socket.emit("join", username);
 
-    function send(){
-      const input = document.getElementById("msg");
-      socket.emit("message", input.value);
-      input.value = "";
-    }
-  </script>
+socket.on("message", (msg) => {
+  const div = document.createElement("div");
+
+  if(msg.includes("joined") || msg.includes("left")){
+    div.className = "system";
+  } else if(msg.startsWith(username + ":")){
+    div.className = "message me";
+    msg = msg.replace(username + ": ", "");
+  } else {
+    div.className = "message";
+  }
+
+  div.textContent = msg;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+function send(){
+  const input = document.getElementById("msg");
+  if(input.value.trim() === "") return;
+  socket.emit("message", input.value);
+  input.value = "";
+}
+</script>
+
 </body>
 </html>
