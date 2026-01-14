@@ -1,124 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { connect, send } from "../lib/realtime";
+import { deriveKey, encrypt, decrypt } from "../lib/crypto";
+import "./globals.css";
 
 export default function Home() {
-  const [nodes, setNodes] = useState([
-    { id: 1, text: "Welcome to Codex Heist" },
-    { id: 2, text: "This is a shared neon arena" },
-    { id: 3, text: "Your ideas will appear as glowing nodes" }
-  ]);
+  const [room, setRoom] = useState("public");
+  const [secret, setSecret] = useState("");
+  const [key, setKey] = useState(null);
+  const [nodes, setNodes] = useState([]);
   const [text, setText] = useState("");
-  const [menu, setMenu] = useState(false);
+  const [online, setOnline] = useState(false);
+  const [typing, setTyping] = useState(false);
 
-  function send() {
-    if (!text) return;
-    setNodes([...nodes, { id: Date.now(), text }]);
+  async function join() {
+    const k = await deriveKey(secret || "public");
+    setKey(k);
+    setNodes([]);
+    connect(room, async payload => {
+      const msg = await decrypt(payload, k);
+      setNodes(n => [...n, msg]);
+    }, setOnline);
+  }
+
+  async function sendMsg() {
+    if (!text || !key) return;
+    const payload = await encrypt(text, key);
+    send(room, payload);
     setText("");
   }
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      
-      {/* Top bar */}
-      <div style={{
-        padding: "12px",
-        borderBottom: "1px solid #312e81",
-        display: "flex",
-        alignItems: "center",
-        gap: 10
-      }}>
-        <button onClick={() => setMenu(true)} style={{
-          background: "none",
-          color: "#a78bfa",
-          fontSize: 22,
-          border: "none"
-        }}>☰</button>
-        <div style={{ fontSize: 18 }}>Codex Arena</div>
+
+      <div style={{ padding: 12, borderBottom: "1px solid #312e81" }}>
+        <b>Codex Heist</b> — {online ? "🟢 Online" : "🔴 Offline"}
       </div>
 
-      {/* Slide menu */}
-      <div style={{
-        position: "fixed",
-        inset: 0,
-        background: "#000c",
-        transform: menu ? "translateX(0)" : "translateX(-100%)",
-        transition: "0.3s",
-        zIndex: 10
-      }} onClick={() => setMenu(false)}>
-        <div style={{
-          width: 260,
-          height: "100%",
-          background: "#020014",
-          padding: 20
-        }}>
-          <h3>Codexes</h3>
-          <div>Codex Arena</div>
-        </div>
+      <div style={{ padding: 10, display: "flex", gap: 6 }}>
+        <input placeholder="room" value={room} onChange={e=>setRoom(e.target.value)} />
+        <input placeholder="secret (for private)" value={secret} onChange={e=>setSecret(e.target.value)} />
+        <button onClick={join}>Join</button>
       </div>
 
-      {/* Arena */}
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        padding: 20,
-        display: "flex",
-        flexDirection: "column",
-        gap: 20
-      }}>
-        {nodes.map(n => (
-          <div key={n.id} style={{
-            alignSelf: "flex-start",
-            padding: "14px 18px",
-            borderRadius: 30,
-            background: "radial-gradient(circle, #3b0764, #020014)",
-            boxShadow: "0 0 20px #7c3aed",
-            maxWidth: "85%",
-            animation: "float 4s ease-in-out infinite"
-          }}>
-            {n.text}
-          </div>
-        ))}
+      <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
+        {nodes.map((n,i) => <div key={i} className="node">{n}</div>)}
+        {typing && <div>...</div>}
       </div>
 
-      {/* Input */}
-      <div style={{
-        padding: 12,
-        borderTop: "1px solid #312e81",
-        display: "flex",
-        gap: 10
-      }}>
+      <div style={{ padding: 10, display: "flex", gap: 8 }}>
         <input
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="Transmit to the arena..."
-          style={{
-            flex: 1,
-            background: "#020014",
-            color: "#a78bfa",
-            border: "1px solid #312e81",
-            borderRadius: 20,
-            padding: "10px 14px"
-          }}
+          onFocus={()=>setTyping(true)}
+          onBlur={()=>setTyping(false)}
+          placeholder="Transmit…"
+          style={{ flex: 1 }}
         />
-        <button onClick={send} style={{
-          background: "#4f46e5",
-          border: "none",
-          borderRadius: 20,
-          padding: "10px 16px",
-          color: "white"
-        }}>
-          Send
-        </button>
+        <button onClick={sendMsg}>Send</button>
       </div>
-
-      <style>{`
-        @keyframes float {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-6px); }
-          100% { transform: translateY(0px); }
-        }
-      `}</style>
 
     </div>
   );
