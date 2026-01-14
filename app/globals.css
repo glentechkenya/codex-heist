@@ -1,0 +1,36 @@
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: radial-gradient(circle at top, #0a0014, #000);
+  color: #a78bfa;
+  font-family: system-ui, sans-serif;
+}
+
+input, button {
+  background: #020014;
+  border: 1px solid #312e81;
+  color: #a78bfa;
+  border-radius: 14px;
+  padding: 10px 14px;
+}
+
+button {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: white;
+  border: none;
+}
+
+.node {
+  background: radial-gradient(circle, #3b0764, #020014);
+  box-shadow: 0 0 20px #7c3aed;
+  border-radius: 24px;
+  padding: 14px 18px;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
