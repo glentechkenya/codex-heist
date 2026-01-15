@@ -17,7 +17,6 @@ body{
   overflow:hidden;
 }
 
-/* Neon background */
 body::before{
   content:"";
   position:fixed;
@@ -28,7 +27,6 @@ body::before{
   z-index:-1;
 }
 
-/* LOGIN */
 #login{
   flex:1;
   display:flex;
@@ -77,7 +75,6 @@ button{
   letter-spacing:1px;
 }
 
-/* CHAT */
 #main{
   display:none;
   flex:1;
@@ -160,12 +157,21 @@ header{
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
+
+const nameInput = document.getElementById("name");
+const roomInput = document.getElementById("room");
+const login = document.getElementById("login");
+const main = document.getElementById("main");
+const messages = document.getElementById("messages");
+const msg = document.getElementById("msg");
+
 let username, room;
 
 function join(){
-  username = name.value;
-  room = roomInput.value || document.getElementById("room").value;
+  username = nameInput.value.trim();
+  room = roomInput.value.trim();
   if(!username || !room) return;
+
   socket.emit("join-room",{username,room});
   login.style.display="none";
   main.style.display="flex";
@@ -180,7 +186,7 @@ socket.on("message", data=>{
 });
 
 function send(){
-  if(!msg.value) return;
+  if(!msg.value.trim()) return;
   socket.emit("message",msg.value);
   msg.value="";
 }
