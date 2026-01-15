@@ -27,6 +27,8 @@ header {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
@@ -35,19 +37,25 @@ header {
   padding: 10px;
   border-radius: 10px;
   max-width: 80%;
+  word-wrap: break-word;
 }
 
 .me {
   background: #00ffcc;
   color: black;
-  margin-left: auto;
+  align-self: flex-end;
+}
+
+.other {
+  align-self: flex-start;
 }
 
 .system {
   background: transparent;
+  color: gray;
   text-align: center;
   font-size: 12px;
-  color: gray;
+  align-self: center;
 }
 
 .input-bar {
@@ -93,29 +101,32 @@ const socket = io();
 const messages = document.getElementById("messages");
 
 let username = prompt("Enter your codename:");
-if(!username) username = "Anonymous";
+if (!username) username = "Anonymous";
 socket.emit("join", username);
 
 socket.on("message", (msg) => {
   const div = document.createElement("div");
 
-  if(msg.includes("joined") || msg.includes("left")){
+  if (msg.includes("joined Codex Heist") || msg.includes("left Codex Heist")) {
     div.className = "system";
-  } else if(msg.startsWith(username + ":")){
+    div.textContent = msg;
+  } 
+  else if (msg.startsWith(username + ":")) {
     div.className = "message me";
-    msg = msg.replace(username + ": ", "");
-  } else {
-    div.className = "message";
+    div.textContent = msg.replace(username + ": ", "");
+  } 
+  else {
+    div.className = "message other";
+    div.textContent = msg;
   }
 
-  div.textContent = msg;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 });
 
-function send(){
+function send() {
   const input = document.getElementById("msg");
-  if(input.value.trim() === "") return;
+  if (input.value.trim() === "") return;
   socket.emit("message", input.value);
   input.value = "";
 }
