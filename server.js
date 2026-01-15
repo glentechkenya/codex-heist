@@ -6,23 +6,24 @@ const io = require("socket.io")(http);
 app.use(express.static("public"));
 
 io.on("connection", (socket) => {
-  let username = "Anonymous";
+  socket.on("join-room", ({ room, username }) => {
+    socket.join(room);
+    socket.room = room;
+    socket.username = username;
 
-  socket.on("join", (name) => {
-    username = name;
-    socket.broadcast.emit("message", `🟢 ${username} joined Codex Heist`);
+    socket.to(room).emit("message", `🟢 ${username} joined the room`);
   });
 
   socket.on("message", (msg) => {
-    io.emit("message", `${username}: ${msg}`);
+    io.to(socket.room).emit("message", `${socket.username}: ${msg}`);
   });
 
   socket.on("disconnect", () => {
-    socket.broadcast.emit("message", `🔴 ${username} left Codex Heist`);
+    if(socket.room){
+      socket.to(socket.room).emit("message", `🔴 ${socket.username} left`);
+    }
   });
 });
 
 const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => {
-  console.log("Codex Heist running");
-});
+http.listen(PORT);
