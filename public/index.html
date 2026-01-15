@@ -2,141 +2,129 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🕶️ Codex Heist</title>
+<title>CODEX // HEIST</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b0b0b;
-  color: #00ffcc;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap');
+
+:root{
+  --neon:#00fff7;
+  --pink:#ff00ff;
+  --bg:#05060a;
+  --panel:#0b0f18;
 }
 
-header {
-  background: #020202;
-  padding: 15px;
-  font-size: 20px;
-  text-align: center;
-  border-bottom: 1px solid #00ffcc;
+*{box-sizing:border-box;font-family:Orbitron,system-ui;}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(0,255,247,.15), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(255,0,255,.15), transparent 40%),
+    var(--bg);
+  color:var(--neon);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
 }
 
-nav {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px;
-  background: #000;
-  border-bottom: 1px solid #00ffcc;
+/* ===== HEADER ===== */
+header{
+  padding:14px;
+  text-align:center;
+  background:linear-gradient(180deg,#000,transparent);
+  border-bottom:1px solid rgba(0,255,247,.3);
+  box-shadow:0 0 20px rgba(0,255,247,.15);
 }
 
-nav button {
-  background: none;
-  border: none;
-  color: #00ffcc;
-  font-size: 14px;
-  padding: 8px;
+header .title{
+  font-size:20px;
+  letter-spacing:2px;
+}
+header .sub{
+  font-size:11px;
+  color:#aaa;
 }
 
-#main {
-  display: none;
-  flex-direction: column;
-  height: calc(100vh - 110px);
+/* ===== LOGIN PANEL ===== */
+#login{
+  padding:20px;
+  text-align:center;
+}
+.panel{
+  background:rgba(10,15,25,.9);
+  border:1px solid rgba(0,255,247,.3);
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 0 25px rgba(0,255,247,.2);
+  margin-top:20px;
 }
 
-#messages {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
+input{
+  width:100%;
+  margin-top:12px;
+  padding:14px;
+  background:#000;
+  border:1px solid rgba(0,255,247,.4);
+  border-radius:30px;
+  color:var(--neon);
+  outline:none;
+  font-size:14px;
 }
 
-.message {
-  margin-bottom: 8px;
+button{
+  margin-top:16px;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:30px;
+  font-weight:600;
+  color:#000;
+  background:linear-gradient(90deg,var(--neon),var(--pink));
+  box-shadow:0 0 20px rgba(0,255,247,.6);
 }
 
-.input-bar {
-  display: flex;
-  padding: 10px;
-  border-top: 1px solid #00ffcc;
-  background: #000;
+/* ===== CHAT ===== */
+#main{
+  flex:1;
+  display:none;
+  flex-direction:column;
 }
 
-input {
-  flex: 1;
-  padding: 12px;
-  background: #111;
-  color: #00ffcc;
-  border: 1px solid #00ffcc;
-  border-radius: 20px;
+#messages{
+  flex:1;
+  padding:12px;
+  overflow-y:auto;
 }
 
-button.send {
-  margin-left: 8px;
-  padding: 12px 18px;
-  background: #00ffcc;
-  color: #000;
-  border: none;
-  border-radius: 20px;
+.msg{
+  background:rgba(0,0,0,.6);
+  border-left:3px solid var(--neon);
+  padding:10px 12px;
+  border-radius:10px;
+  margin-bottom:10px;
+  max-width:80%;
+  box-shadow:0 0 10px rgba(0,255,247,.2);
+  word-wrap:break-word;
 }
-</style>
-</head>
-
-<body>
-
-<header>🕶️ Codex Heist</header>
-
-<nav>
-  <button onclick="showLogin()">Join Chat</button>
-  <button onclick="showCreate()">Create Room</button>
-</nav>
-
-<div id="login">
-  <h3 style="text-align:center; margin-top:20px;">Enter Room & Codename</h3>
-  <input id="login-name" placeholder="Your codename" style="margin:10px;width:90%;"/>
-  <input id="login-room" placeholder="Room name" style="margin:10px;width:90%;"/>
-  <button class="send" onclick="joinRoom()" style="margin:10px;">Join</button>
-</div>
-
-<div id="main">
-  <div id="messages"></div>
-  <div class="input-bar">
-    <input id="msg" placeholder="Type message…" />
-    <button class="send" onclick="sendMsg()">Send</button>
-  </div>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const socket = io();
-let username, room;
-
-function showLogin() {
-  document.getElementById("login").style.display = "block";
-  document.getElementById("main").style.display = "none";
+.me{
+  margin-left:auto;
+  border-left:none;
+  border-right:3px solid var(--pink);
+  background:rgba(20,0,30,.8);
+}
+.system{
+  background:none;
+  border:none;
+  box-shadow:none;
+  color:#888;
+  text-align:center;
+  margin:10px auto;
 }
 
-function joinRoom() {
-  username = document.getElementById("login-name").value.trim();
-  room = document.getElementById("login-room").value.trim();
-  if(!username || !room) return;
-
-  socket.emit("join-room", { room, username });
-  document.getElementById("login").style.display = "none";
-  document.getElementById("main").style.display = "flex";
-}
-
-socket.on("message", msg => {
-  const div = document.createElement("div");
-  div.className = "message";
-  div.textContent = msg;
-  document.getElementById("messages").appendChild(div);
-});
-
-function sendMsg() {
-  const input = document.getElementById("msg");
-  if(!input.value) return;
-  socket.emit("message", input.value);
-  input.value = "";
-}
-</script>
-
-</body>
-</html>
+/* ===== INPUT BAR ===== */
+.input-bar{
+  display:flex;
+  padding:10px;
+  background:rgba(0,0,0,.8);
+  border-top:1px solid rgba(0,255,247,
