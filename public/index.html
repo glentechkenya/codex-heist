@@ -2,195 +2,150 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CODEX // HEIST</title>
+<title>CODEX HEIST</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap">
 
 <style>
-*{box-sizing:border-box}
 body{
   margin:0;
   background:#05070b;
   color:#00f7ff;
-  font-family:system-ui,Arial;
+  font-family:Orbitron,system-ui;
   height:100vh;
-  display:flex;
-  flex-direction:column;
   overflow:hidden;
 }
 
-body::before{
-  content:"";
+/* SPLASH */
+#splash{
   position:fixed;
   inset:0;
-  background:
-    radial-gradient(circle at top,#0ff2,transparent 60%),
-    radial-gradient(circle at bottom,#f0f2,transparent 60%);
-  z-index:-1;
-}
-
-#login{
-  flex:1;
+  background:#05070b;
   display:flex;
-  flex-direction:column;
   justify-content:center;
-  padding:20px;
+  align-items:center;
+  z-index:5;
+}
+.circle{
+  position:absolute;
+  width:150px;
+  height:150px;
+  border:3px solid #00f7ff;
+  border-radius:50%;
+  animation:spin 5s linear infinite;
+}
+.circle:nth-child(2){
+  border-color:#ff00ff;
+  animation-direction:reverse;
+}
+@keyframes spin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
 }
 
-.logo{
-  text-align:center;
-  font-size:28px;
-  letter-spacing:2px;
-  margin-bottom:30px;
-  color:#ff00ff;
-  text-shadow:0 0 15px #ff00ff;
+/* APP */
+#app{display:none;height:100vh;display:flex;flex-direction:column}
+header{
+  padding:10px;
+  background:#05080f;
+  border-bottom:1px solid #00f7ff;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
+#menuBtn{font-size:20px;cursor:pointer}
+#online{font-size:12px;color:#ff00ff}
 
-.panel{
-  background:rgba(10,15,30,.8);
-  border:1px solid #00f7ff;
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 0 25px rgba(0,255,255,.4);
+#messages{
+  flex:1;
+  padding:10px;
+  overflow-y:auto;
 }
+.msg{
+  max-width:75%;
+  margin-bottom:10px;
+  padding:10px;
+  border-radius:12px;
+  background:#0b1525;
+}
+.me{margin-left:auto;background:#200020}
+.user{font-size:11px;color:#ff00ff;margin-bottom:5px}
 
-input{
-  width:100%;
-  padding:14px;
-  margin-top:12px;
+#typing{font-size:12px;color:#888;padding:5px}
+
+#inputBar{
+  display:flex;
+  padding:10px;
+  border-top:1px solid #00f7ff;
+}
+#inputBar input{
+  flex:1;
+  padding:12px;
   background:#02040a;
   border:1px solid #00f7ff;
   border-radius:20px;
   color:#00f7ff;
-  font-size:15px;
 }
-
-button{
-  width:100%;
-  padding:14px;
-  margin-top:15px;
-  background:linear-gradient(90deg,#ff00ff,#00f7ff);
-  color:black;
-  border:none;
-  border-radius:20px;
-  font-weight:bold;
-  letter-spacing:1px;
-}
-
-#main{
-  display:none;
-  flex:1;
-  flex-direction:column;
-}
-
-header{
-  padding:12px;
-  text-align:center;
-  background:#05080f;
-  border-bottom:1px solid #00f7ff;
-  box-shadow:0 0 15px #00f7ff55;
-}
-
-#messages{
-  flex:1;
-  overflow-y:auto;
-  padding:12px;
-}
-
-.msg{
-  margin-bottom:12px;
-  padding:12px;
-  border-radius:14px;
-  background:rgba(10,20,40,.7);
-  border-left:3px solid #00f7ff;
-  box-shadow:0 0 10px rgba(0,255,255,.25);
-}
-
-.me{
-  background:rgba(255,0,255,.15);
-  border-left:3px solid #ff00ff;
-}
-
-.user{
-  font-size:12px;
-  color:#ff00ff;
-  margin-bottom:5px;
-}
-
-.inputBar{
-  display:flex;
-  padding:10px;
-  background:#05080f;
-  border-top:1px solid #00f7ff;
-}
-
-.inputBar input{
-  flex:1;
-  margin:0;
-}
-
-.inputBar button{
-  width:80px;
+#inputBar button{
   margin-left:8px;
+  padding:12px;
+  border:none;
+  background:#00f7ff;
+  border-radius:20px;
+}
+
+/* MENU */
+#menu{
+  position:fixed;
+  inset:0;
+  background:#000a;
+  display:none;
+}
+#menu .panel{
+  background:#05080f;
+  padding:20px;
+  margin:60px;
+  border:1px solid #00f7ff;
 }
 </style>
 </head>
 
 <body>
 
-<div id="login">
-  <div class="logo">CODEX // HEIST</div>
+<div id="splash">
+  <div class="circle"></div>
+  <div class="circle"></div>
+</div>
+
+<div id="app">
+<header>
+  <div id="menuBtn">☰</div>
+  <div>CODEX GLOBAL</div>
+  <div id="online">0 online</div>
+</header>
+
+<div id="messages"></div>
+<div id="typing"></div>
+
+<div id="inputBar">
+  <input id="msg" placeholder="Type message…">
+  <button onclick="send()">Send</button>
+</div>
+</div>
+
+<div id="menu">
   <div class="panel">
-    <input id="name" placeholder="Codename">
-    <input id="room" placeholder="Node ID">
-    <button onclick="join()">ENTER</button>
+    <input id="roomCode" placeholder="Room code">
+    <button onclick="joinRoom()">Join Room</button>
+    <button onclick="goGlobal()">Global</button>
+    <button onclick="clearChat()">Clear</button>
+    <button onclick="closeMenu()">Close</button>
   </div>
 </div>
 
-<div id="main">
-  <header>CODEX SECURE CHANNEL</header>
-  <div id="messages"></div>
-  <div class="inputBar">
-    <input id="msg" placeholder="Send encrypted text…">
-    <button onclick="send()">SEND</button>
-  </div>
-</div>
-
-<script src="/socket.io/socket.io.js"></script>
-<script>
-const socket = io();
-
-const nameInput = document.getElementById("name");
-const roomInput = document.getElementById("room");
-const login = document.getElementById("login");
-const main = document.getElementById("main");
-const messages = document.getElementById("messages");
-const msg = document.getElementById("msg");
-
-let username, room;
-
-function join(){
-  username = nameInput.value.trim();
-  room = roomInput.value.trim();
-  if(!username || !room) return;
-
-  socket.emit("join-room",{username,room});
-  login.style.display="none";
-  main.style.display="flex";
-}
-
-socket.on("message", data=>{
-  const div=document.createElement("div");
-  div.className="msg"+(data.user===username?" me":"");
-  div.innerHTML="<div class='user'>"+data.user+"</div>"+data.text;
-  messages.appendChild(div);
-  messages.scrollTop=messages.scrollHeight;
-});
-
-function send(){
-  if(!msg.value.trim()) return;
-  socket.emit("message",msg.value);
-  msg.value="";
-}
-</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
